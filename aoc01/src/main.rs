@@ -9,9 +9,11 @@ fn main() {
         .map(|value| value.parse::<i32>().unwrap())
         .collect();
 
-    let answer = count_measurements_larger_than_previous(&values);
+    let answer_1_1 = count_measurements_larger_than_previous(&values);
+    let answer_1_2 = count_measurement_windows_larger_than_previous(&values, 3);
 
-    println!("answer: {}", answer);
+    println!("answer 1.1: {}", answer_1_1);
+    println!("answer 1.2: {}", answer_1_2);
 }
 
 fn count_measurements_larger_than_previous(values: &Vec<i32>) -> i32 {
@@ -26,4 +28,21 @@ fn count_measurements_larger_than_previous(values: &Vec<i32>) -> i32 {
     }
 
     measurements_larger_than_previous
+}
+
+fn count_measurement_windows_larger_than_previous(values: &Vec<i32>, window_size: usize) -> i32 {
+    let mut measurement_windows = vec![];
+
+    for i in 0..values.len() {
+        let value = values[i];
+        measurement_windows.push(value);
+
+        for j in 1..window_size {
+            if j > i { break; }
+
+            measurement_windows[i - j] += value;
+        }
+    }
+
+    count_measurements_larger_than_previous(&measurement_windows)
 }
