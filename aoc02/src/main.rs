@@ -30,6 +30,7 @@ fn main() {
         .collect();
 
     println!("answer 2.1: {}", calculate_position(&commands));
+    println!("answer 2.2: {}", calculate_position_with_aim(&commands));
 }
 
 /// position is calculated by using a series of commands
@@ -48,6 +49,35 @@ fn calculate_position(commands: &Vec<Command>) -> u32 {
             Command { direction: Direction::Forward, units } => distance += units,
             Command { direction: Direction::Down, units } => depth += units,
             Command { direction: Direction::Up, units } => depth -= units,
+        }
+    }
+
+    distance * depth
+}
+
+/// position is calculated by using a series of commands
+///
+/// command correction:
+///
+/// Down: increase aim by X units
+/// Up: decreases aim by X units
+/// Forward: increase distance by X, increase depth by aim * X
+///
+/// Returns distance * depth
+///
+fn calculate_position_with_aim(commands: &Vec<Command>) -> u32 {
+    let mut distance = 0;
+    let mut depth = 0;
+    let mut aim = 0;
+
+    for command in commands {
+        match command {
+            Command { direction: Direction::Forward, units } => {
+                distance += units;
+                depth += aim * units;
+            },
+            Command { direction: Direction::Down, units } => aim += units,
+            Command { direction: Direction::Up, units } => aim -= units,
         }
     }
 
