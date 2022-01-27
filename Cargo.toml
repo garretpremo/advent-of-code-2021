@@ -6,5 +6,6 @@ edition = "2021"
 [workspace]
 members = [
     "aoc01",
-    "aoc02"
+    "aoc02",
+    "aoc03"
 ]
