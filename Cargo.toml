@@ -7,5 +7,6 @@ edition = "2021"
 members = [
     "aoc01",
     "aoc02",
-    "aoc03"
+    "aoc03",
+    "aoc04",
 ]
