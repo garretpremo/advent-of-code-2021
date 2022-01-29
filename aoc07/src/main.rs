@@ -10,10 +10,11 @@ fn main() {
         .map(|counter| counter.parse::<usize>().unwrap())
         .collect();
 
-    println!("answer 7.1: {}", calculate_most_fuel_efficient_lateral_movements(&positions));
+    println!("answer 7.1: {}", calculate_most_fuel_efficient_lateral_movements(&positions, true));
+    println!("answer 7.2: {}", calculate_most_fuel_efficient_lateral_movements(&positions, false));
 }
 
-fn calculate_most_fuel_efficient_lateral_movements(positions: &Vec<usize>) -> usize {
+fn calculate_most_fuel_efficient_lateral_movements(positions: &Vec<usize>, constant_fuel_consumption: bool) -> usize {
     let mut max = 0;
     let mut min = usize::MAX;
     let mut sum = 0;
@@ -43,16 +44,36 @@ fn calculate_most_fuel_efficient_lateral_movements(positions: &Vec<usize>) -> us
     for (position, count) in position_count_map.iter() {
         for i in 0..fuel_consumption.len() {
             let diff = usize::max(i, *position) - usize::min(i, *position);
-            fuel_consumption[i] += diff * count;
+
+            fuel_consumption[i] += match constant_fuel_consumption {
+                true => diff * count,
+                false => get_non_constant_fuel_burned(diff) * count
+            }
+
+
         }
     }
 
     fuel_consumption.into_iter().min().unwrap()
 }
 
+/// return factorial addition of distance
+fn get_non_constant_fuel_burned(distance: usize) -> usize {
+    ((distance * distance) + distance) / 2
+}
+
 #[test]
 fn test_sample_input() {
     let sample_input = vec![16,1,2,0,4,2,7,1,2,14];
 
-    assert_eq!(calculate_most_fuel_efficient_lateral_movements(&sample_input), 37);
+    assert_eq!(calculate_most_fuel_efficient_lateral_movements(&sample_input, true), 37);
+}
+
+#[test]
+fn test_factorial_addition() {
+    assert_eq!(get_non_constant_fuel_burned(1), 1);
+    assert_eq!(get_non_constant_fuel_burned(2), 3);
+    assert_eq!(get_non_constant_fuel_burned(3), 6);
+    assert_eq!(get_non_constant_fuel_burned(4), 10);
+    assert_eq!(get_non_constant_fuel_burned(5), 15);
 }
