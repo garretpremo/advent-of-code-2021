@@ -1,7 +1,10 @@
-use std::fs;
+mod decoder;
 
-struct IO {
-    _input: Vec<String>,
+use std::fs;
+use decoder::Decoder;
+
+pub struct IO {
+    input: Vec<String>,
     output: Vec<String>
 }
 
@@ -11,6 +14,7 @@ fn main() {
     let signals: Vec<IO> = parse(input_file_contents);
 
     println!("answer 8.1: {}", count_easy_digits(&signals));
+    println!("answer 8.2: {}", calculate_output(&signals));
 }
 
 fn parse(input: String) -> Vec<IO> {
@@ -19,7 +23,7 @@ fn parse(input: String) -> Vec<IO> {
         .map(|signal| {
             let io: Vec<&str> = signal.split(" | ").collect();
             IO {
-                _input: io[0].split(" ").map(|str| String::from(str)).collect(),
+                input: io[0].split(" ").map(|str| String::from(str)).collect(),
                 output: io[1].split(" ").map(|str| String::from(str)).collect()
             }
         })
@@ -41,6 +45,17 @@ fn count_easy_digits(signals: &Vec<IO>) -> u32 {
         })
 }
 
+fn calculate_output(signals: &Vec<IO>) -> u32 {
+    let mut output = 0;
+
+    for signal in signals {
+        let mut decoder = Decoder::new();
+        output += decoder.decode(signal);
+    }
+
+    output
+}
+
 #[test]
 fn test_sample_input() {
 
@@ -49,4 +64,5 @@ fn test_sample_input() {
     let sample_signals = parse(sample_input);
 
     assert_eq!(count_easy_digits(&sample_signals), 26);
+    assert_eq!(calculate_output(&sample_signals), 61229);
 }
