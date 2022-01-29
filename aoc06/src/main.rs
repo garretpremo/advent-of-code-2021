@@ -10,6 +10,7 @@ fn main() {
         .collect();
 
     println!("answer 6.1: {}", calculate_reproduction(&timers, 80));
+    println!("answer 6.1: {}", calculate_reproduction(&timers, 256));
 }
 
 fn calculate_reproduction(initial_timers: &Vec<usize>, days: u32) -> usize {
@@ -41,4 +42,5 @@ fn test_sample_input() {
 
     assert_eq!(calculate_reproduction(&sample_input, 18), 26);
     assert_eq!(calculate_reproduction(&sample_input, 80), 5934);
+    assert_eq!(calculate_reproduction(&sample_input, 256), 26984457539);
 }
