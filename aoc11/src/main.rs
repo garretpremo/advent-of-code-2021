@@ -18,6 +18,7 @@ fn main() {
     let matrix = parse(input_file_contents);
 
     println!("answer 11.1: {}", count_flashes(&matrix, 100));
+    println!("answer 11.2: {}", calculate_first_synchronization_step(&matrix));
 }
 
 fn parse(input: String) -> Vec<Vec<u32>> {
@@ -34,41 +35,66 @@ fn parse(input: String) -> Vec<Vec<u32>> {
     matrix
 }
 
+fn calculate_first_synchronization_step(matrix: &Vec<Vec<u32>>) -> u32 {
+    let height = matrix.len() as u32;
+    let width = matrix.first().unwrap().len() as u32;
+    let mut mutable_matrix = matrix.clone();
+    let mut step = 1;
+
+    loop {
+        match do_step(&mut mutable_matrix) {
+            flashes if flashes == height * width => break,
+            _ => {}
+        }
+
+        step += 1;
+    }
+
+    step
+}
+
 fn count_flashes(matrix: &Vec<Vec<u32>>, steps: usize) -> u32 {
     let mut flashes = 0;
     let mut mutable_matrix = matrix.clone();
 
     for _step in 0..steps {
+        flashes += do_step(&mut mutable_matrix);
+    }
 
-        // first, increment all by 1
-        for matrix_row in mutable_matrix.iter_mut() {
-            for energy in matrix_row.iter_mut() {
-                *energy += 1;
+    flashes
+}
+
+fn do_step(matrix: &mut Vec<Vec<u32>>) -> u32 {
+    let mut flashes = 0;
+
+    // first, increment all by 1
+    for matrix_row in matrix.iter_mut() {
+        for energy in matrix_row.iter_mut() {
+            *energy += 1;
+        }
+    }
+
+    // for any nodes > 9, cause them to increment all neighbors by 1
+    let mut cells_incrementing_neighbors = vec![];
+
+    for (row, matrix_row) in matrix.iter().enumerate() {
+        for (col, energy) in matrix_row.iter().enumerate() {
+            if *energy == 10 {
+                cells_incrementing_neighbors.push(Cell { row, col });
             }
         }
+    }
 
-        // for any nodes > 9, cause them to increment all neighbors by 1
-        let mut cells_incrementing_neighbors = vec![];
+    for Cell { row, col } in cells_incrementing_neighbors {
+        increment_neighbors(matrix, row, col);
+    }
 
-        for (row, matrix_row) in mutable_matrix.iter().enumerate() {
-            for (col, energy) in matrix_row.iter().enumerate() {
-                if *energy == 10 {
-                    cells_incrementing_neighbors.push(Cell { row, col });
-                }
-            }
-        }
-
-        for Cell { row, col } in cells_incrementing_neighbors {
-            increment_neighbors(&mut mutable_matrix, row, col);
-        }
-
-        // set any node with energy > 9 back to 0 and increment flashes
-        for matrix_row in mutable_matrix.iter_mut() {
-            for energy in matrix_row.iter_mut() {
-                if *energy > 9 {
-                    *energy = 0;
-                    flashes += 1;
-                }
+    // set any node with energy > 9 back to 0 and increment flashes
+    for matrix_row in matrix.iter_mut() {
+        for energy in matrix_row.iter_mut() {
+            if *energy > 9 {
+                *energy = 0;
+                flashes += 1;
             }
         }
     }
@@ -124,5 +150,6 @@ fn test_sample_input() {
 
     assert_eq!(count_flashes(&sample_matrix, 10), 204);
     assert_eq!(count_flashes(&sample_matrix, 100), 1656);
+    assert_eq!(calculate_first_synchronization_step(&sample_matrix), 195);
 }
 
