@@ -9,6 +9,7 @@ fn main() {
     let lines = parse(input_file_contents);
 
     println!("answer 10.1: {}", calculate_illegality_score(&lines));
+    println!("answer 10.2: {}", calculate_middle_completion_score(&lines));
 }
 
 fn parse(input: String) -> Vec<String> {
@@ -31,11 +32,34 @@ fn calculate_illegality_score(lines: &Vec<String>) -> u32 {
     illegality_score
 }
 
+fn calculate_middle_completion_score(lines: &Vec<String>) -> u64 {
+    let mut completion_scores: Vec<u64> = vec![];
+
+    for line in lines.iter() {
+        match check(line) {
+            SyntaxCheckerResult::Incomplete(completion) => {
+                let mut score = 0u64;
+
+                for c in completion.chars() {
+                    score = score * 5;
+                    score += get_completion_score(c);
+                }
+                completion_scores.push(score);
+            },
+            _ => {}
+        }
+    }
+
+    completion_scores.sort();
+    completion_scores[completion_scores.len() / 2]
+}
+
 #[test]
 fn test_sample_input() {
     let sample_input = String::from("[({(<(())[]>[[{[]{<()<>>\r\n[(()[<>])]({[<{<<[]>>(\r\n{([(<{}[<>[]}>{[]{[(<()>\r\n(((({<>}<{<{<>}{[]{[]{}\r\n[[<[([]))<([[{}[[()]]]\r\n[{[{({}]{}}([{[{{{}}([]\r\n{<[[]]>}<{[{[{[]{()[[[]\r\n[<(<(<(<{}))><([]([]()\r\n<{([([[(<>()){}]>(<<{{\r\n<{([{{}}[<[[[<>{}]]]>[]]");
     let sample_lines = parse(sample_input);
 
     assert_eq!(calculate_illegality_score(&sample_lines), 26397);
+    assert_eq!(calculate_middle_completion_score(&sample_lines), 288957);
 }
 
