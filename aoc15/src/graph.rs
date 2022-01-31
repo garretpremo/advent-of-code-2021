@@ -55,6 +55,33 @@ impl Graph {
         }
     }
 
+    pub fn add_nodes_and_expand(&mut self, danger_map: &Vec<Vec<u32>>) {
+        let original_height = danger_map.len();
+        let original_width = danger_map.first().unwrap().len();
+        self.height = danger_map.len() * 5;
+        self.width = danger_map.first().unwrap().len() * 5;
+
+        for y_expansion in 0..5 {
+            for x_expansion in 0..5 {
+                for (y, row) in danger_map.iter().enumerate() {
+                    for (x, danger) in row.iter().enumerate() {
+                        let point = Point {
+                            x: (x + (x_expansion * original_width)),
+                            y: (y + (y_expansion * original_height))
+                        };
+
+                        let d = match danger + x_expansion as u32 + y_expansion as u32 {
+                            danger if danger > 9 => danger - 9, // wrap danger > 10 back to 1
+                            danger => danger
+                        };
+
+                        self.nodes.insert(point, d);
+                    }
+                }
+            }
+        }
+    }
+
     /// custom impl of dijkstra's algorithm
     ///     Use a BinaryHeap with a custom struct 'State' as a Queue
     pub fn find_least_dangerous_path(&self, source: Point, target: Point) -> u32 {

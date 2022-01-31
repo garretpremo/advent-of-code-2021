@@ -9,7 +9,8 @@ fn main() {
 
     let danger_map = parse(input_file_contents);
 
-    println!("answer 15.1: {}", find_least_dangerous_path(&danger_map));
+    println!("answer 15.1: {}", find_least_dangerous_path(&danger_map, false));
+    println!("answer 15.2: {}", find_least_dangerous_path(&danger_map, true));
 }
 
 fn parse(input: String) -> Vec<Vec<u32>> {
@@ -19,9 +20,13 @@ fn parse(input: String) -> Vec<Vec<u32>> {
         .collect()
 }
 
-fn find_least_dangerous_path(danger_map: &Vec<Vec<u32>>) -> u32 {
+fn find_least_dangerous_path(danger_map: &Vec<Vec<u32>>, expand: bool) -> u32 {
     let mut graph = Graph::new();
-    graph.add_nodes(&danger_map);
+
+    match expand {
+        true => graph.add_nodes_and_expand(&danger_map),
+        false => graph.add_nodes(&danger_map)
+    }
 
     let start = Point{ x: 0, y: 0 };
     let end = Point { x: graph.get_width() - 1, y: graph.get_height() - 1 };
@@ -41,4 +46,18 @@ fn test_sample_input() {
     let end = Point { x: graph.get_width() - 1, y: graph.get_height() - 1 };
 
     assert_eq!(graph.find_least_dangerous_path(start, end), 40);
+}
+
+#[test]
+fn test_sample_input_part_2() {
+    let sample_input = String::from("1163751742\r\n1381373672\r\n2136511328\r\n3694931569\r\n7463417111\r\n1319128137\r\n1359912421\r\n3125421639\r\n1293138521\r\n2311944581");
+    let danger_map = parse(sample_input);
+
+    let mut graph = Graph::new();
+    graph.add_nodes_and_expand(&danger_map);
+
+    let start = Point{ x: 0, y: 0 };
+    let end = Point { x: graph.get_width() - 1, y: graph.get_height() - 1 };
+
+    assert_eq!(graph.find_least_dangerous_path(start, end), 315);
 }
