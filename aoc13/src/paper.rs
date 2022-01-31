@@ -83,4 +83,25 @@ impl Paper {
     pub fn count_dots(&self) -> usize {
         self.dots.len()
     }
+
+    pub fn print_dots(&self) {
+        let mut max_x = 0;
+        let mut max_y = 0;
+
+        for dot in self.dots.iter() {
+            max_x = max_x.max(dot.x);
+            max_y = max_y.max(dot.y);
+        }
+
+        for y in 0..=max_y {
+            for x in 0..=max_x {
+                if self.dots.contains(&Point { x, y }) {
+                    print!("#");
+                } else {
+                    print!(" ");
+                }
+            }
+            print!("\n");
+        }
+    }
 }
