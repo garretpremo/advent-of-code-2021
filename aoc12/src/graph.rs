@@ -44,20 +44,20 @@ impl Graph {
         Graph { nodes: HashMap::new() }
     }
 
-    pub fn count_distinct_paths(&self) -> u32 {
+    pub fn count_distinct_paths(&self, extra_small_visit: bool) -> u32 {
         let start = self.nodes.get("start").unwrap();
         let path: HashSet<String> = HashSet::from([String::from("start")]);
 
         let mut distinct_paths = 0;
 
         for edge in start.edges.iter() {
-            distinct_paths += self.find_all_distinct_paths(&path, edge);
+            distinct_paths += self.find_all_distinct_paths(&path, edge, extra_small_visit);
         }
 
         distinct_paths
     }
 
-    fn find_all_distinct_paths(&self, path: &HashSet<String>, id: &String) -> u32 {
+    fn find_all_distinct_paths(&self, path: &HashSet<String>, id: &String, extra_small_visit: bool) -> u32 {
         if id.clone() == String::from("end") {
             return 1;
         }
@@ -70,8 +70,14 @@ impl Graph {
         let node = self.nodes.get(id.as_str()).unwrap();
 
         for edge in node.edges.iter() {
+            if edge.clone() == String::from("start") {
+                continue;
+            }
+
             if Node::is_big(edge) || !path.contains(edge) {
-                distinct_paths += self.find_all_distinct_paths(&path_copy, edge);
+                distinct_paths += self.find_all_distinct_paths(&path_copy, edge, extra_small_visit);
+            } else if extra_small_visit {
+                distinct_paths += self.find_all_distinct_paths(&path_copy, edge, false);
             }
         }
 

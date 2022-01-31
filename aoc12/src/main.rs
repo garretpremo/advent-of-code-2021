@@ -11,7 +11,8 @@ fn main() {
     let mut graph = Graph::new();
     graph.add_edges(&edges);
 
-    println!("answer 12.1: {}", graph.count_distinct_paths());
+    println!("answer 12.1: {}", graph.count_distinct_paths(false));
+    println!("answer 12.2: {}", graph.count_distinct_paths(true));
 }
 
 fn parse(input: String) -> Vec<Edge> {
@@ -32,7 +33,8 @@ fn test_sample_input() {
     let mut graph = Graph::new();
     graph.add_edges(&edges);
 
-    assert_eq!(graph.count_distinct_paths(), 10);
+    assert_eq!(graph.count_distinct_paths(false), 10);
+    assert_eq!(graph.count_distinct_paths(true), 36);
 }
 
 #[test]
@@ -43,6 +45,7 @@ fn test_complex_sample_input() {
     let mut graph = Graph::new();
     graph.add_edges(&edges);
 
-    assert_eq!(graph.count_distinct_paths(), 226);
+    assert_eq!(graph.count_distinct_paths(false), 226);
+    assert_eq!(graph.count_distinct_paths(true), 3509);
 }
 
