@@ -40,6 +40,7 @@ fn main() {
     let target = parse(input_file_contents);
 
     println!("answer 17.1: {}", find_highest_possible_y_position(&target));
+    println!("answer 17.2: {}", find_distinct_initial_velocities(&target));
 }
 
 fn parse(input: String) -> Rectangle {
@@ -62,25 +63,16 @@ fn parse(input: String) -> Rectangle {
 }
 
 fn find_highest_possible_y_position(target: &Rectangle) -> i64 {
-    let x_min = target.top_left.x;
-    let x_max = target.bottom_right.x;
+    let min_x_velocity = find_first_triangle_number(target.top_left.x);
+    let max_x_velocity = find_first_triangle_number(target.bottom_right.x);
 
-    // assuming y is always negative
-    let y_max = i64::abs(target.bottom_right.y) + 1;
-
-    let mut min_x_velocity = 1;
-    while nth_triangle_number(min_x_velocity) < x_min {
-        min_x_velocity += 1;
-    }
-    let mut max_x_velocity = min_x_velocity;
-    while nth_triangle_number(max_x_velocity) < x_max {
-        max_x_velocity += 1;
-    }
+    let max_y_velocity = i64::abs(target.bottom_right.y) + 1;
+    let min_y_velocity = 0;
 
     let mut overall_max_y = 0;
 
     for x_vel in min_x_velocity..=max_x_velocity {
-        for y_vel in 0..y_max {
+        for y_vel in min_y_velocity..=max_y_velocity {
             let mut probe = Probe::new(x_vel, y_vel);
             let mut max_y = overall_max_y.clone();
 
@@ -103,6 +95,45 @@ fn find_highest_possible_y_position(target: &Rectangle) -> i64 {
     overall_max_y
 }
 
+fn find_distinct_initial_velocities(target: &Rectangle) -> u32 {
+    let min_x_velocity = find_first_triangle_number(target.top_left.x);
+    let max_x_velocity = target.bottom_right.x + 1;
+
+    let max_y_velocity = i64::abs(target.bottom_right.y) + 1;
+    let min_y_velocity = target.bottom_right.y;
+
+    let mut distinct_velocities = 0;
+
+    for x_vel in min_x_velocity..=max_x_velocity {
+        for y_vel in min_y_velocity..=max_y_velocity {
+            let mut probe = Probe::new(x_vel, y_vel);
+
+            loop {
+                probe.simulate_step();
+
+                if target.is_within(&probe.position) {
+                    distinct_velocities += 1;
+                    break;
+                }
+
+                if target.is_beyond(&probe.position) {
+                    break;
+                }
+            }
+        }
+    }
+
+    distinct_velocities
+}
+
+fn find_first_triangle_number(n: u32) -> u32 {
+    let mut min_triangle_number = 1;
+    while nth_triangle_number(min_triangle_number) < n {
+        min_triangle_number += 1;
+    }
+    min_triangle_number
+}
+
 fn nth_triangle_number(n: u32) -> u32 {
     (n * (n + 1)) / 2
 }
@@ -118,4 +149,5 @@ fn test_sample_input() {
     assert_eq!(target.bottom_right.y, -10);
 
     assert_eq!(find_highest_possible_y_position(&target), 45);
+    assert_eq!(find_distinct_initial_velocities(&target), 112);
 }
