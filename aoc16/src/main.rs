@@ -1,6 +1,5 @@
 use std::{fs, usize};
 
-#[allow(dead_code)]
 #[derive(Eq, PartialEq, Debug)]
 enum Packet {
     Literal(LiteralPacket),
@@ -21,6 +20,34 @@ impl Packet {
             Packet::Operator(packet) => packet.version_sum
         }
     }
+
+    fn get_value(&self) -> u64 {
+        match self {
+            Packet::Literal(packet) => packet.value,
+            Packet::Operator(packet) => {
+                let sub_packet_values: Vec<u64> = packet.sub_packets.iter().map(|p| p.get_value()).collect();
+
+                match packet.type_id {
+                    // version 0: SUM
+                    0 => sub_packet_values.iter().sum(),
+                    // version 1: PRODUCT
+                    1 => sub_packet_values.iter().product(),
+                    // version 2: MIN
+                    2 => sub_packet_values.iter().min().unwrap().clone(),
+                    // version 3: MAX
+                    3 => sub_packet_values.iter().max().unwrap().clone(),
+                    // version 5: GREATER THAN
+                    5 => match sub_packet_values[0] > sub_packet_values[1] { true => 1, false => 0 },
+                    // version 6: LESS THAN
+                    6 => match sub_packet_values[0] < sub_packet_values[1] { true => 1, false => 0 },
+                    // version 7: EQUAL TO
+                    7 => match sub_packet_values[0] == sub_packet_values[1] { true => 1, false => 0 },
+
+                    _ => panic!("invalid version type")
+                }
+            }
+        }
+    }
 }
 
 #[derive(Eq, PartialEq, Debug)]
@@ -34,6 +61,7 @@ struct LiteralPacket {
 struct OperatorPacket {
     version: u32,
     version_sum: u32,
+    type_id: u32,
     length: usize,
     sub_packets: Vec<Packet>,
 }
@@ -44,6 +72,7 @@ fn main() {
     let packet = parse(input_file_contents);
 
     println!("answer 16.1: {}", packet.get_version_sum());
+    println!("answer 16.2: {}", packet.get_value());
 }
 
 fn parse(input: String) -> Packet {
@@ -65,7 +94,7 @@ fn parse_packet(packet: &str, sub_packet: bool) -> Packet {
 
     match type_id {
         4 => parse_literal(packet, sub_packet),
-        _ => parse_operator(packet, sub_packet)
+        type_id => parse_operator(packet, type_id, sub_packet)
     }
 }
 
@@ -98,7 +127,7 @@ fn parse_literal(packet: &str, is_sub_packet: bool) -> Packet {
     Packet::Literal(LiteralPacket { version, length, value })
 }
 
-fn parse_operator(packet: &str, is_sub_packet: bool) -> Packet {
+fn parse_operator(packet: &str, type_id: u32, is_sub_packet: bool) -> Packet {
     let version = u32::from_str_radix(&packet[0..3], 2).unwrap();
     let length_type_id = u32::from_str_radix(&packet[6..=6], 2).unwrap();
 
@@ -150,7 +179,7 @@ fn parse_operator(packet: &str, is_sub_packet: bool) -> Packet {
         length += 4 - (length % 4);
     }
 
-    Packet::Operator(OperatorPacket { version, version_sum, length, sub_packets })
+    Packet::Operator(OperatorPacket { version, version_sum, type_id, length, sub_packets })
 }
 
 #[test]
@@ -162,7 +191,8 @@ fn test_sample_input() {
 #[test]
 fn test_literal_packet() {
     let packet_hex = String::from("D2FE28");
-    parse(packet_hex);
+    let packet = parse(packet_hex);
+    assert_eq!(packet.get_length(), 24)
 }
 
 #[test]
