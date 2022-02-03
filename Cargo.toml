@@ -22,4 +22,5 @@ members = [
     "aoc15",
     "aoc16",
     "aoc17",
+    "aoc18",
 ]
