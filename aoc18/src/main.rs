@@ -209,6 +209,7 @@ fn main() {
     let numbers = parse(input_file_contents);
 
     println!("18.1 answer: {}", add_snail_numbers(&numbers));
+    println!("18.2 answer: {}", get_largest_magnitude_of_any_two_numbers(&numbers));
 }
 
 fn parse(input: String) -> Vec<SnailNumber> {
@@ -235,6 +236,25 @@ fn add_snail_numbers(numbers: &Vec<SnailNumber>) -> u32 {
     }
 
     results[results.len() - 1].calculate_magnitude()
+}
+
+fn get_largest_magnitude_of_any_two_numbers(numbers: &Vec<SnailNumber>) -> u32 {
+
+    let mut max = 0;
+
+    for i in 0..numbers.len() - 1 {
+        for j in 0..numbers.len() {
+            if i == j { continue; }
+
+            let a = &numbers[i];
+            let b = &numbers[j];
+
+            let sum = a.add(b);
+            max = max.max(sum.calculate_magnitude());
+        }
+    }
+
+    max
 }
 
 fn create_snail_number_from_string(string: &str) -> SnailNumber {
